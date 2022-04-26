@@ -53,7 +53,7 @@ Trzeba znaleźć pliki z konfiguracją danej aplikacji i edytować
 
 Odpal, aby znaleźć pliki z konfiguracją `nginx`:
 ```
-find /etc/systemd -name nginx*
+find /etc/systemd -name 'nginx*'
 ```
 Otwórz każdy znaleziony plik.
 
@@ -78,11 +78,11 @@ LimitNOFILE=300000
 
 Konfigurację PHP znajdziesz, odpalając:
 ```
-find /etc/systemd -name php*
+find /etc/systemd -name 'php*'
 ```
 Konfigurację MariaDB znajdziesz, odpalając:
 ```
-find /etc/systemd -name mariadb*
+find /etc/systemd -name 'mariadb*'
 ```
 ### 8.2.3 Zrestartuj serwer
 

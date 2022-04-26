@@ -84,10 +84,86 @@ innodb_log_buffer_size = 256M
 innodb_flush_log_at_trx_commit = 2
 ```
 
-#### 3.2.5 Restart MariaDB
+#### 3.2.5 SQL mode - problemy z acc. makerami
+
+Acc. makery, np. Gesior2012 nie trzymają się standardu SQL.
+Przez wiele lat nie było to problemem,
+bo domyślne ustawienia pozwalały łamać niektóre zasady SQLa.
+W nowym MySQL i MariaDB to się zmieniło.
+
+Na szczęście można przestawić tryb działania, na taki jak był wcześniej,
+dodając w konfiguracji linijkę:
+```
+sql_mode=''
+```
+#### 3.2.6 Restart MariaDB
 
 Aby zmiany w konfiguracji zaczęły działać, należy zrestartować MariaDB:
 ```
 systemctl restart mysql
 ```
 (tak, piszemy `mysql`, a restartuje się MariaDB)
+
+### 3.3 Dostęp do bazy
+
+Domyślnie baza MariaDB jest dostępna z konsoli z użytkownika `root` bez hasła.
+Musimy zmienić dostęp do użytkownika tak, żeby móc logować się hasłem.
+
+W przykładzie ustawimy hasło do użytkownika `root` na `secretpass`.
+
+#### 3.3.1 Logowanie hasłem
+
+Odpal:
+```
+mysql
+```
+Odpali sie konsola serwera MariaDB.
+
+Odpal po kolei:
+1. Wybierz bazę zawierającą użytkowników:
+```
+use mysql;
+```
+2. Zmienia typ logowania z `unix_socket`
+(logowanie na podstawie użytkownika z konsoli)
+na logowanie hasłem:
+```
+UPDATE `user` SET `plugin` = 'mysql_native_password' WHERE `user` = 'root' AND `host` = 'localhost';
+```
+3. Ustaw hasło użytkownika `root` na `secretpass`:
+```
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('secretpass');
+```
+4. Przeładuj ustawienia użytkowników MariaDB:
+```
+flush privileges;
+```
+5. Wyłącz konsole MariaDB (można też kliknąć CTRL+D)
+```
+exit
+```
+
+#### 3.3.2 Automatycznie logowanie z konsoli
+
+Po ustawieniu hasła, żeby zalogować się do MariaDB z konsoli, trzeba wpisać:
+```
+mysql -p
+```
+a następnie wpisać hasło.
+
+Hasło można wpisać w konfiguracji MariaDB.
+Po tej zmianie komendy `mysql` i `mysqldump` nie będą wymagały wpisywania hasła.
+
+Edytuj plik:
+```
+/etc/mysql/mariadb.conf.d/50-client.cnf
+```
+Pod:
+```
+[client]
+```
+Dodaj linijkę:
+```
+password=secretpass
+```
+Po tej zmianie znowu można używać `mysql` (bez ` -p`) i nie podawać hasła.

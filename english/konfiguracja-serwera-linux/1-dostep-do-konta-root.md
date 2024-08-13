@@ -1,128 +1,115 @@
-# 1. Logowanie użytkownikiem `root` przez SSH
 
-Jeśli serwerownia nie przysłała hasła do `root`, 
-tylko do `debian` lub `ubuntu`, 
-to dobrze odblokować dostęp do konta `root` przez SSH.
+# 1. Logging in as `root` via SSH
 
-Wiele osób odradza korzystanie z konta `root`.
-Jednak początkujący - nie znający się na uprawnieniach plików w Linux -
-mają więcej problemów z podstawowymi czynnościami na użytkowniku `ubuntu`/`debian`,
-niż mogą narobić używając konta `root` do wszystkiego.
+If the data center didn't send the `root` password but instead sent one for `debian` or `ubuntu`, it's a good idea to unlock access to the `root` account via SSH.
 
-## 1.1 Edycja `/etc/ssh/sshd_config`
+Many people advise against using the `root` account. However, beginners who are not familiar with file permissions in Linux often encounter more issues with basic tasks on the `ubuntu`/`debian` user account than they might cause by using the `root` account for everything.
 
-Po połączeniu przez SSH do serwera należy edytować plik `/etc/ssh/sshd_config`:
+## 1.1 Editing `/etc/ssh/sshd_config`
+
+After connecting to the server via SSH, edit the `/etc/ssh/sshd_config` file:
 ```
 sudo pico /etc/ssh/sshd_config
 ```
 
-### 1.1.1 Edycja `PermitRootLogin`
+### 1.1.1 Editing `PermitRootLogin`
 
-Kliknij `CTRL+W`, żeby włączyć wyszukiwanie i znajdź:
+Press `CTRL+W` to enable search and find:
 ```
 PermitRootLogin
 ```
 
-Prawdopodobnie będzie to wyglądać tak:
+It will likely look like this:
 ```
 #PermitRootLogin prohibit-password
 ```
 
-Zmień to na:
+Change it to:
 ```
 PermitRootLogin yes
 ```
 
-### 1.1.2 Edycja `PasswordAuthentication`
+### 1.1.2 Editing `PasswordAuthentication`
 
-Kliknij `CTRL+W`, żeby włączyć wyszukiwanie i znajdź:
+Press `CTRL+W` to enable search and find:
 ```
 PasswordAuthentication
 ```
 
-Jeśli będzie to wyglądać tak (np. w Oracle Cloud tak jest):
+If it looks like this (as it does in Oracle Cloud, for example):
 ```
 PasswordAuthentication no
 ```
 
-Zmień to na:
+Change it to:
 ```
 PasswordAuthentication yes
 ```
 
-### 1.1.3 Edycja czasu nieaktywności połączenia SSH
+### 1.1.3 Editing SSH Inactivity Timeout
 
-Przy okazji można zmienić wartości `ClientAliveInterval` i `ClientAliveCountMax` na:
+You can also change the `ClientAliveInterval` and `ClientAliveCountMax` values to:
 ```
 ClientAliveInterval 20
 ClientAliveCountMax 180
 ```
-Dzięki temu SSH nie będzie zrywać połączenia co chwilę.
+This will prevent SSH from frequently disconnecting.
 
-Kliknij `CRTL+O`, żeby zapisać zmiany i `CTRL+X`, żeby zakończyć edycję pliku.
+Press `CTRL+O` to save the changes and `CTRL+X` to exit the file editor.
 
-### 1.1.4 Przeładowanie konfiguracji SSH
+### 1.1.4 Reloading the SSH Configuration
 
-Zrestartuj `sshd`, aby przeładować konfigurację:
+Restart `sshd` to reload the configuration:
 ```
 sudo systemctl restart sshd
 ```
 
-## 1.2 Zmiana hasła `root`
+## 1.2 Changing the `root` Password
 
-Nie wiadomo, jakie jest hasło do użytkownika `root`, więc należy jakieś ustawić.
-Wpisz:
+If you don't know the password for the `root` user, you need to set one. Type:
 ```
 sudo passwd
 ```
-Pojawi się pytanie o nowe hasło, a potem o powtóre wpisanie.
+You will be prompted to enter a new password and then to confirm it.
 
-Po zmianie hasła powinno dać się zalogować do serwera na konto `root`.
+After changing the password, you should be able to log in to the server as `root`.
 
-## 1.3 Odblokowanie logowania do konta `root` używając klucza SSH
+## 1.3 Unlocking `root` Login Using SSH Key
 
-Ten problem, jak na razie miałem tylko na serwerze z `Oracle Cloud`.
+This issue has only occurred for me on a server from `Oracle Cloud`.
 
-Próba dodania swojego klucza SSH do serwera - tego samego, który podało się tworząc maszynę i 
-który używa się do logowania do konta `ubuntu`:
+When you try to add your SSH key to the server—the same key you provided when creating the machine and which you use to log in to the `ubuntu` account:
 ```
 ssh-copy-id root@12.34.45.56
 ```
-kończy się komunikatem:
+you get the message:
 ```
 Please login as the user "ubuntu" rather than the user "root".
 ```
-i nie da się zalogować na konto `root` używając dodanego klucza.
+and you cannot log in to the `root` account using the added key.
 
-Problemem jest to, że klucz SSH, który podaje się tworząc nowy serwer,
-jest automatycznie przypisany do konta `root`.
-Tzn. jest wklejany do pliku `/root/.ssh/authorized_keys`.
+The problem is that the SSH key provided when creating the new server is automatically assigned to the `root` account. It is inserted into the `/root/.ssh/authorized_keys` file.
 
-Tylko że w `/root/.ssh/authorized_keys` jest dopisana konfiguracja, 
-która blokuje dostęp do `root` używając klucza.
-Zawartość `/root/.ssh/authorized_keys` wygląda tak:
+However, the `/root/.ssh/authorized_keys` file includes a configuration that blocks access to `root` using the key. The contents of `/root/.ssh/authorized_keys` look like this:
 ```
-no-port-forwarding,no-agent-forwarding,no-X11-forwarding,command="echo 'Please login as the user \"ubuntu\" rather than the user \"root\".';echo;sleep 10;exit 142" ssh-rsa AAAAB3(...)ZDQSZP jskalski@jskalski
+no-port-forwarding,no-agent-forwarding,no-X11-forwarding,command="echo 'Please login as the user "ubuntu" rather than the user "root".';echo;sleep 10;exit 142" ssh-rsa AAAAB3(...)ZDQSZP jskalski@jskalski
 ```
-Usuń to, co jest przed `ssh-rsa`:
+Remove everything before `ssh-rsa`:
 ```
-no-port-forwarding,no-agent-forwarding,no-X11-forwarding,command="echo 'Please login as the user \"ubuntu\" rather than the user \"root\".';echo;sleep 10;exit 142" 
+no-port-forwarding,no-agent-forwarding,no-X11-forwarding,command="echo 'Please login as the user "ubuntu" rather than the user "root".';echo;sleep 10;exit 142"
 ```
-Czyli po edycji powinno zostać coś jak:
+So after editing, it should look something like this:
 ```
 ssh-rsa AAAAB3(...)ZDQSZP jskalski@jskalski
 ```
 
-### 1.4 Skrót do Putty logujący do serwera
+### 1.4 Putty Shortcut for Logging into the Server
 
-Jeśli nie używasz logowania kluczem SSH, tylko hasłem.
-To prawdopodobnie w kółko kopiujesz hasło z jakiegoś pliku tekstowego.
+If you are not using SSH key login but instead a password, you probably keep copying the password from a text file.
 
-Zamiast w kółko wpisywać hasło w Putty,
-możesz utworzyć skrót do Putty w Windowsie i 
-dopisać parametry z loginem, IP i hasłem:
+Instead of repeatedly entering the password in Putty, you can create a shortcut to Putty on Windows and add parameters for the login, IP, and password:
 ```
-putty.exe LOGIN@IP -pw HASŁO
+putty.exe LOGIN@IP -pw PASSWORD
 ```
 
-![Skrót do Putty](img/1-putty-shortcut.png "Skrót do Putty")
+![Putty Shortcut](img/1-putty-shortcut.png "Putty Shortcut")

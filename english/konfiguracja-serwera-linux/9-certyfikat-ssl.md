@@ -1,3 +1,4 @@
-# 9. Certyfikat SSL
 
-Od kilku lat certyfikaty SSL są darmowe.
+# 9. SSL Certificate
+
+For several years now, SSL certificates have been free.

@@ -1,42 +1,43 @@
-# 3. Konfiguracja MariaDB
 
-### 3.1 Domyślna konfiguracja
+# 3. MariaDB Configuration
 
-Domyślna konfiguracja MariaDB zazwyczaj używa około 400 MB RAM.
+### 3.1 Default Configuration
 
-Jest ustawione wiele limitów, które nie pozwalają na wykonanie obliczeń w RAM i
-wiele zapytań do bazy kończy się utworzeniem 'tymczasowego pliku na dysku' -
-co bardzo spowalnia działanie MariaDB.
-Dodatkowo z domyślną konfiguracją dane są zazwyczaj ładowane z dysku.
+The default MariaDB configuration typically uses around 400 MB of RAM.
 
-Jeśli masz na serwerze trochę wolnego RAMu, to warto to zmienić.
+There are many limits set that prevent calculations from being performed in RAM, and
+many database queries end up creating a 'temporary file on disk' - 
+which significantly slows down MariaDB.
+Additionally, with the default configuration, data is usually loaded from disk.
 
-### 3.2 Optymalizacja - edycja konfiguracji
+If you have some free RAM on the server, it's worth changing this.
 
-Optymalizacja konfiguracji MariaDB jest bardzo złożona.
-Poniżej przykładowa konfiguracja opracowana dla dużych OTSów.
+### 3.2 Optimization - Editing the Configuration
 
-__UWAGA!__
-Jeśli chcesz optymalizować bazę danych już działającego OTSa,
-to najpierw zrób kopię zapasową!
+Optimizing MariaDB configuration is very complex.
+Below is an example configuration designed for large OTSs.
 
-Konfiguracja MariaDB w Ubuntu 20.04 jest w pliku:
+__WARNING!__
+If you want to optimize the database of an already running OTS,
+make sure to back up first!
+
+The MariaDB configuration in Ubuntu 20.04 is located in the file:
 ```
 /etc/mysql/mariadb.conf.d/50-server.cnf
 ```
-Przykład zmian w konfiguracji, po których MariaDB powinna używać 4-8 GB RAM.
-Zalecana dla każdego serwera z 16 GB RAM i więcej.
+Example changes in the configuration after which MariaDB should use 4-8 GB of RAM.
+Recommended for any server with 16 GB RAM or more.
 
-#### 3.2.1 Zmiana podstawowych limitów
+#### 3.2.1 Changing Basic Limits
 
-Znajdź:
+Find:
 ```
 #key_buffer_size        = 16M
 #max_allowed_packet     = 16M
 #thread_stack           = 192K
 #thread_cache_size      = 8
 ```
-Odkomentuj i zamień wartości na:
+Uncomment and change the values to:
 ```
 key_buffer_size        = 512M
 max_allowed_packet     = 512M
@@ -44,37 +45,37 @@ thread_stack           = 1M
 thread_cache_size      = 128
 ```
 
-#### 3.2.2 Zmiana limitów otwartych połączeń i tabel
+#### 3.2.2 Changing Connection and Table Limits
 
-Ustawiamy wysokie wartości, których serwer nie powinien nigdy osiągnąć. 
+Set high values that the server should never reach.
 
-Znajdź:
+Find:
 ```
 #max_connections        = 100
 #table_cache            = 64
 ```
-Odkomentuj i zamień wartości na:
+Uncomment and change the values to:
 ```
 max_connections        = 50000
 table_cache            = 50000
 ```
 
-#### 3.2.3 Zmiana limitów zapytań przetwarzanych w RAM
+#### 3.2.3 Changing Query Limits Processed in RAM
 
-Dodaj:
+Add:
 ```
 max_heap_table_size     = 1G
 tmp_table_size          = 1G
 bulk_insert_buffer_size = 1G
 ```
 
-#### 3.2.4 Zmiana limitów dla InnoDB
+#### 3.2.4 Changing Limits for InnoDB
 
-InnoDB to silnik MariaDB, który jest używany przez bazę danych OTSa.
+InnoDB is the MariaDB engine used by the OTS database.
 
-Te zmiany mają największy wpływ na czas zapisu OTSa.
+These changes have the greatest impact on the OTS save time.
 
-Dodaj:
+Add:
 ```
 innodb_file_per_table = 1
 innodb_buffer_pool_size = 4G
@@ -84,86 +85,87 @@ innodb_log_buffer_size = 256M
 innodb_flush_log_at_trx_commit = 2
 ```
 
-#### 3.2.5 SQL mode - problemy z acc. makerami
+#### 3.2.5 SQL Mode - Issues with Acc. Makers
 
-Acc. makery, np. Gesior2012 nie trzymają się standardu SQL.
-Przez wiele lat nie było to problemem,
-bo domyślne ustawienia pozwalały łamać niektóre zasady SQLa.
-W nowym MySQL i MariaDB to się zmieniło.
+Acc. makers, e.g., Gesior2012, do not adhere to SQL standards.
+For many years this was not a problem,
+because the default settings allowed breaking some SQL rules.
+This has changed in the new MySQL and MariaDB.
 
-Na szczęście można przestawić tryb działania, na taki jak był wcześniej,
-dodając w konfiguracji linijkę:
+Fortunately, you can switch the mode to work as it did before,
+by adding the following line to the configuration:
 ```
 sql_mode=''
 ```
-#### 3.2.6 Restart MariaDB
 
-Aby zmiany w konfiguracji zaczęły działać, należy zrestartować MariaDB:
+#### 3.2.6 Restarting MariaDB
+
+To apply the configuration changes, restart MariaDB:
 ```
 systemctl restart mysql
 ```
-(tak, piszemy `mysql`, a restartuje się MariaDB)
+(yes, you write `mysql`, but it restarts MariaDB)
 
-### 3.3 Dostęp do bazy
+### 3.3 Database Access
 
-Domyślnie baza MariaDB jest dostępna z konsoli z użytkownika `root` bez hasła.
-Musimy zmienić dostęp do użytkownika tak, żeby móc logować się hasłem.
+By default, the MariaDB database is accessible from the console by the `root` user without a password.
+We need to change the user access so that you can log in with a password.
 
-W przykładzie ustawimy hasło do użytkownika `root` na `secretpass`.
+In the example, we will set the `root` user password to `secretpass`.
 
-#### 3.3.1 Logowanie hasłem
+#### 3.3.1 Logging in with a Password
 
-Odpal:
+Run:
 ```
 mysql
 ```
-Odpali sie konsola serwera MariaDB.
+This will start the MariaDB server console.
 
-Odpal po kolei:
-1. Wybierz bazę zawierającą użytkowników:
+Run the following commands in sequence:
+1. Select the database containing the users:
 ```
 use mysql;
 ```
-2. Zmienia typ logowania z `unix_socket`
-(logowanie na podstawie użytkownika z konsoli)
-na logowanie hasłem:
+2. Change the login type from `unix_socket`
+(logging in based on the console user)
+to password login:
 ```
 UPDATE `user` SET `plugin` = 'mysql_native_password' WHERE `user` = 'root' AND `host` = 'localhost';
 ```
-3. Ustaw hasło użytkownika `root` na `secretpass`:
+3. Set the `root` user password to `secretpass`:
 ```
 SET PASSWORD FOR 'root'@'localhost' = PASSWORD('secretpass');
 ```
-4. Przeładuj ustawienia użytkowników MariaDB:
+4. Reload MariaDB user settings:
 ```
 flush privileges;
 ```
-5. Wyłącz konsole MariaDB (można też kliknąć CTRL+D)
+5. Exit the MariaDB console (you can also press CTRL+D)
 ```
 exit
 ```
 
-#### 3.3.2 Automatycznie logowanie z konsoli
+#### 3.3.2 Automatic Console Login
 
-Po ustawieniu hasła, żeby zalogować się do MariaDB z konsoli, trzeba wpisać:
+After setting the password, to log in to MariaDB from the console, you need to enter:
 ```
 mysql -p
 ```
-a następnie wpisać hasło.
+and then enter the password.
 
-Hasło można wpisać w konfiguracji MariaDB.
-Po tej zmianie komendy `mysql` i `mysqldump` nie będą wymagały wpisywania hasła.
+You can enter the password in the MariaDB configuration.
+After this change, the `mysql` and `mysqldump` commands will no longer require entering a password.
 
-Edytuj plik:
+Edit the file:
 ```
 /etc/mysql/mariadb.conf.d/50-client.cnf
 ```
-Pod:
+Under:
 ```
 [client]
 ```
-Dodaj linijkę:
+Add the line:
 ```
 password=secretpass
 ```
-Po tej zmianie znowu można używać `mysql` (bez ` -p`) i nie podawać hasła.
+After this change, you can again use `mysql` (without `-p`) without entering a password.

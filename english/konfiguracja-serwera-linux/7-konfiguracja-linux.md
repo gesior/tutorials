@@ -1,70 +1,70 @@
-# 7. Konfiguracja Linux
 
-Warto przestawić kilka opcji w konfiguracji systemu, żeby zablokować podstawowe ataki.
+# 7. Linux Configuration
 
-Dodatkowo możesz zmienić ustawienia sieci,
-żeby serwer był w stanie obsługiwać więcej połączeń w razie ataku DDoS.
+It's worth adjusting a few system configuration options to block basic attacks.
 
-## 7.1 Edycja konfiguracji
+Additionally, you can change network settings to allow the server to handle more connections in case of a DDoS attack.
 
-Konfiguracja podstawowych ustawień Linux jest w pliku:
+## 7.1 Configuration Editing
+
+The basic Linux settings configuration is in the file:
 ```
 /etc/sysctl.conf
 ```
 
-### 7.1.1 Spoof protection
+### 7.1.1 Spoof Protection
 
-Znajdź linijkę z `Spoof protection` i odkomentuj konfiguracje pod nią, czyli:
+Find the line with `Spoof protection` and uncomment the configurations below it:
 ```
 #net.ipv4.conf.default.rp_filter=1
 #net.ipv4.conf.all.rp_filter=1
 ```
-Zamień na:
+Replace it with:
 ```
 net.ipv4.conf.default.rp_filter=1
 net.ipv4.conf.all.rp_filter=1
 ```
 
-### 7.1.2 MITM attacks
+### 7.1.2 MITM Attacks
 
-Znajdź linijkę z `MITM attacks` i odkomentuj konfiguracje pod nią, czyli:
+Find the line with `MITM attacks` and uncomment the configurations below it:
 ```
 #net.ipv4.conf.all.accept_redirects = 0
 #net.ipv6.conf.all.accept_redirects = 0
 ```
-Zamień na:
+Replace it with:
 ```
 net.ipv4.conf.all.accept_redirects = 0
 net.ipv6.conf.all.accept_redirects = 0
 ```
 
-### 7.1.3 we are not a router
+### 7.1.3 We Are Not a Router
 
-Znajdź linijki z `we are not a router` (są 2) i odkomentuj konfiguracje pod nimi, czyli:
+Find the lines with `we are not a router` (there are 2) and uncomment the configurations below them:
 ```
 #net.ipv4.conf.all.send_redirects = 0
 ```
-Zamień na:
+Replace it with:
 ```
 net.ipv4.conf.all.send_redirects = 0
 ```
-i:
+and:
 ```
 #net.ipv4.conf.all.accept_source_route = 0
 #net.ipv6.conf.all.accept_source_route = 0
 ```
-Zamień na:
+Replace it with:
 ```
 net.ipv4.conf.all.accept_source_route = 0
 net.ipv6.conf.all.accept_source_route = 0
 ```
 
-### 7.1.4 Ustawienia sieci
+### 7.1.4 Network Settings
 
-Szybsze kasowanie 'zamkniętych połączeń', ponowne używanie tych samych portów i 
-większe limity połączeń/pakietów czekających na obsłużenie.
+Faster clearing of 'closed connections', reusing the same ports, and 
+higher limits for connections/packets waiting to be handled.
 
-Na końcu pliku dodaj:
+Add the following at the end of the file:
 ```
 net.ipv4.tcp_fin_timeout = 30
 net.ipv4.tcp_tw_reuse = 1
@@ -73,9 +73,9 @@ net.ipv4.tcp_max_syn_backlog = 8192
 net.core.netdev_max_backlog = 100000
 ```
 
-### 7.1.5 Załadowanie zmian
+### 7.1.5 Applying Changes
 
-Aby załadować zmiany z pliku `/etc/sysctl.conf` bez restartu Linuxa odpal:
+To apply the changes from the `/etc/sysctl.conf` file without restarting Linux, run:
 ```
 sysctl -p
 ```

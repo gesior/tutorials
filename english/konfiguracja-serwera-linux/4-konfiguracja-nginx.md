@@ -1,31 +1,33 @@
-# 4. Konfiguracja nginx
 
-### 4.1 Domyślna konfiguracja
+# 4. nginx Configuration
 
-Domyślna konfiguracja nginx jest z grubsza OK.
+### 4.1 Default Configuration
 
-Zmiany, jakie zrobimy:
-- dodamy format logowania zapisujący dodatkowe informacje (kraj użytkownika i czas wykonania PHP)
-- cachowanie plików logów
-- cachowanie otwartych plików
-- większy maksymalny rozmiar przesyłanego pliku
-- szybsze zrywanie połączeń
+The default nginx configuration is roughly OK.
 
-Kraj użytkownika będzie logowany tylko po dodaniu CloudFlare.
+The changes we will make:
+- add a logging format that records additional information (user's country and PHP execution time)
+- log file caching
+- open file caching
+- increased maximum upload file size
+- faster connection termination
 
-### 4.2 Edycja konfiguracji
+The user's country will only be logged after adding CloudFlare.
 
-Konfiguracja nginx w Ubuntu 20.04 jest w pliku:
+### 4.2 Configuration Editing
+
+The nginx configuration in Ubuntu 20.04 is located in the file:
 ```
 /etc/nginx/nginx.conf
 ```
 
-### 4.2.1 Zmiana ustawień
-Znajdź:
+### 4.2.1 Changing Settings
+
+Find:
 ```
 http {
 ```
-Linijkę niżej dodaj:
+Add the following line below it:
 ```
         log_format cloudflarelog '$remote_addr "$HTTP_CF_IPCOUNTRY" "$http_host" [$time_local] '
         '"$request" $status $body_bytes_sent "$upstream_response_time" "$http_referer" "$http_user_agent"' ;
@@ -39,18 +41,18 @@ Linijkę niżej dodaj:
         client_max_body_size 128M;
 ```
 
-Znajdź:
+Find:
 ```
 keepalive_timeout 65;
 ```
-Zamień na:
+Replace it with:
 ```
 keepalive_timeout 5;
 ```
 
-### 4.2.2 Restart nginx
+### 4.2.2 Restarting nginx
 
-Aby zmiany w konfiguracji zaczęły działać, należy zrestartować nginx:
+To apply the configuration changes, restart nginx:
 ```
 systemctl restart nginx
 ```

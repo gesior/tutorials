@@ -1,41 +1,44 @@
-# 6. Konfiguracja nginx - strona www
 
-## 6.1 Domyślna konfiguracja
+# 6. nginx Configuration - Website
 
-Domyślnie nginx ładuje stronę z katalogu `/var/www/html` i NIE obsługuje PHP.
+## 6.1 Default Configuration
 
-Zmiany, jakie zrobimy:
-- ładowanie strony z `/home/www`
-- dodanie obsługi PHP
+By default, nginx loads the website from the `/var/www/html` directory and does NOT support PHP.
 
-## 6.2 Edycja konfiguracji
+The changes we will make:
+- load the website from `/home/www`
+- add PHP support
 
-Konfiguracja strony www nginx w Ubuntu 20.04 jest w pliku:
+## 6.2 Configuration Editing
+
+The nginx website configuration in Ubuntu 20.04 is located in the file:
 ```
 /etc/nginx/sites-enabled/default
 ```
 
-### 6.2.1 Zmiana katalogu
-Znajdź:
+### 6.2.1 Changing the Directory
+
+Find:
 ```
 root /var/www/html;
 ```
-Zamień na:
+Replace it with:
 ```
 root /home/www;
 ```
 
-### 6.2.2 Dodanie obsługi PHP
-Znajdź:
+### 6.2.2 Adding PHP Support
+
+Find:
 ```
         index index.html index.htm index.nginx-debian.html;
 ```
-Dodaj `index.php`, czyli ma wyglądać tak:
+Add `index.php`, so it should look like this:
 ```
         index index.php index.html index.htm index.nginx-debian.html;
 ```
 
-Znajdź:
+Find:
 ```
         #location ~ \.php$ {
         #       include snippets/fastcgi-php.conf;
@@ -46,13 +49,13 @@ Znajdź:
         #       fastcgi_pass 127.0.0.1:9000;
         #}
 ```
-Trzeba odkomentować cały blok i w nim linijki:
+You need to uncomment the entire block and the lines within it:
 ```
 include snippets/fastcgi-php.conf;
 fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
 ```
 
-Czyli po zmianach ma wyglądać tak:
+So after changes, it should look like this:
 ```
         location ~ \.php$ {
                include snippets/fastcgi-php.conf;
@@ -64,9 +67,9 @@ Czyli po zmianach ma wyglądać tak:
         }
 ```
 
-### 6.2.3 Restart nginx
+### 6.2.3 Restarting nginx
 
-Aby zmiany w konfiguracji zaczęły działać, należy zrestartować nginx:
+To apply the configuration changes, restart nginx:
 ```
 systemctl restart nginx
 ```

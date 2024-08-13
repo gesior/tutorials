@@ -1,52 +1,53 @@
-# 2. Instalacja nginx, MariaDB, PHP i podstawowych narzędzi
 
-### 2.1 Instalacja PHP
+# 2. Installing nginx, MariaDB, PHP, and Basic Tools
 
-Instalacja PHP (`php-fpm` dla `nginx`) i bibliotek PHP dla Gesior2012:
+### 2.1 Installing PHP
+
+Install PHP (`php-fpm` for `nginx`) and PHP libraries for Gesior2012:
 ```
 apt install php-fpm php-bcmath php-common php-curl php-json php-gd php-mbstring php-mysql php-pdo php-xml php-zip
 ```
-Na systemach z PHP w wersji starszej niż 8.0 trzeba jeszcze zainstalować `php-json`:
+On systems with PHP versions older than 8.0, you also need to install `php-json`:
 ```
 apt install php-json
 ```
-Od wersji 8.0 `json` jest wbudowany w PHP i nie trzeba go instalować oddzielnie.
+From version 8.0, `json` is built into PHP and does not need to be installed separately.
 
-### 2.2 Instalacja nginx
+### 2.2 Installing nginx
 
-Instalacja nginx:
+Install nginx:
 ```
 apt install nginx
 ```
 
-### 2.3 Instalacja MariaDB
+### 2.3 Installing MariaDB
 
-MariaDB to zastępstwo dla MySQL. W wielu miejscach w Linux konfiguracje MariaDB mają w nazwie `mysql`.
+MariaDB is a replacement for MySQL. In many places in Linux, MariaDB configurations are named with `mysql`.
 
-Instalacja MariaDB:
+Install MariaDB:
 ```
 apt install mariadb-server mariadb-client
 ```
 
-### 2.4 Podstawowe narzędzia
+### 2.4 Basic Tools
 
-Warto zainstalować kilka podstawowych narzędzi.
-Przydają się przy diagnozowaniu problemów z serwerem i podczas ataków.
+It's worth installing a few basic tools.
+They are useful for diagnosing server problems and during attacks.
 ```
 apt install fail2ban iptables-persistent htop nload tcpdump mc zip unzip git screen screenie net-tools moreutils traceroute
 ```
-Podczas instalacji mogą się pojawić 2 pytania odnośnie zapisu `iptables`. Na oba odpowiadamy 'Nie'.
+During the installation, two questions about saving `iptables` may appear. Answer 'No' to both.
 
-Co instalujemy:
-- `fail2ban` - zabezpiecza SSH, blokuje IP po kilku próbach logowania ze złym hasłem
-- `iptables-persistent` - pozwala zapisać reguły `iptables` do pliku i ładuje je po restarcie serwera
-- `htop` - rozbudowana wersja `top`
-- `nload` - pokazuje aktualne użycie łącza na serwerze
-- `tcpdump` - zapisuje/wyświetla wszystkie przychodzące/wychodzące pakiety sieciowe
-- `zip` + `unzip` - programy do pakowania/wypakowywania plików `.zip`
-- `git` - klient GIT
-- `mc` - graficzny manager plików działający w konsoli
-- `screen` + `screenie` - aplikacja do zarządzania działającymi `screen`
-- `net-tools` - zawiera `netstat` pozwalający sprawdzić na jakiś IP i portach nasłuchuje serwer 
-- `moreutils` - zawiera `ts`, aplikację pozwalająca dodawać czas w milisekundach do logów (np. z konsoli OTSa)
-- `traceroute` - pozwala śledzić trasę pakietów sieciowych (diagnostyka problemów z łączem) 
+What we are installing:
+- `fail2ban` - secures SSH, blocks IP after several login attempts with the wrong password
+- `iptables-persistent` - allows saving `iptables` rules to a file and loads them after the server restarts
+- `htop` - an extended version of `top`
+- `nload` - shows the current network usage on the server
+- `tcpdump` - captures/displays all incoming/outgoing network packets
+- `zip` + `unzip` - programs for packing/unpacking `.zip` files
+- `git` - GIT client
+- `mc` - graphical file manager operating in the console
+- `screen` + `screenie` - applications for managing running `screen`
+- `net-tools` - includes `netstat` which allows checking which IP and ports the server is listening on
+- `moreutils` - includes `ts`, an application that adds a timestamp in milliseconds to logs (e.g., from OTS console)
+- `traceroute` - allows tracing the route of network packets (diagnosing connection problems)
